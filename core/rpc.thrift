@@ -1,3 +1,4 @@
+namespace go rpc
 namespace java com.wb.zero.thrift
 const string VERSION = "19.24.0"
 
