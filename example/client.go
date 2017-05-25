@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	startTime := currentTimeMillis()
 	transportFactory := thrift.NewTFramedTransportFactory(thrift.NewTTransportFactory())
 	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 
@@ -28,13 +27,21 @@ func main() {
 	}
 	defer transport.Close()
 
+	startTime := currentTimeMillis()
+	for i := 0; i < 10000; i++ {
 
-	for i := 0; i < 1000; i++ {
-		paramMap := make(map[string]string)
-		paramMap["name"] = "qinerg"
-		paramMap["passwd"] = "123456"
-		r1, e1 := client.Invoke(currentTimeMillis(), "login", paramMap)
-		fmt.Println(i, "Call->", r1, e1)
+		header := &rpc.Header{
+		}
+		header.Protocol = "thrift"
+		header.Tid = "3232b32b32h3h2b32b3n2b3nb2n32"
+		msg := &rpc.Msg{
+		}
+		msg.Header = header
+		msg.Body = "hello"
+
+		r1, e1 := client.Invoke("biz_service", "login", msg)
+		body := r1.GetBody()
+		fmt.Println(i, "Call->", body, e1)
 	}
 
 	endTime := currentTimeMillis()

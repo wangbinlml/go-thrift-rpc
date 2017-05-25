@@ -6,7 +6,6 @@ type Rpc struct {
 }
 
 func (rpc *Rpc) createApp() Application {
-	app = new()
 	return app
 }
 func GetAccessService() RpcClient {

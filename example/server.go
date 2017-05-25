@@ -4,21 +4,12 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"fmt"
 	"os"
-	"github.com/wangbinlml/go-thrift-rpc/core"
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
+	"github.com/wangbinlml/go-thrift-rpc/core"
 )
 const (
 	NetworkAddr = "127.0.0.1:19090"
 )
-
-type RRPCInvokeServiceImpl struct {
-}
-
-func (this *RRPCInvokeServiceImpl) Invoke(serviceName string, methodName string, msg *core.Msg) (r *core.Msg, err error) {
-	fmt.Println("-->FunCall:", msg)
-
-	return
-}
 
 func main() {
 	transportFactory := thrift.NewTFramedTransportFactory(thrift.NewTTransportFactory())
@@ -31,7 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handler := &RRPCInvokeServiceImpl{}
+	handler := &core.RPCInvokeServiceImpl{}
 	processor := rpc.NewRPCInvokeServiceProcessor(handler)
 
 	server := thrift.NewTSimpleServer4(processor, serverTransport, transportFactory, protocolFactory)
