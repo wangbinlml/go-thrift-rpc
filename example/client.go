@@ -28,7 +28,7 @@ func main() {
 	defer transport.Close()
 
 	startTime := currentTimeMillis()
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 10000000; i++ {
 
 		header := &rpc.Header{
 		}

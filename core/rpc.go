@@ -1,17 +1,18 @@
 package core
 
-var app Application
+var app *ApplicationImpl
 
 type Rpc struct {
 }
 
-func (rpc *Rpc) createApp() Application {
+func (rpc *Rpc) CreateApp() *ApplicationImpl {
+	app = app.Init()
 	return app
 }
-func GetAccessService() RpcClient {
+func (rpc *Rpc) GetAccessService() *RpcClientImpl {
 	return app.GetRpcClient()
 }
 
-func GetRpcService() RpcServer {
+func (rpc *Rpc) GetRpcService() *RpcServerImpl {
 	return app.GetRpcServer();
 }

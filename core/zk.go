@@ -1,26 +1,103 @@
 package core
 
 import (
-	"fmt"
+	log "github.com/alecthomas/log4go"
 	"github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
+	"errors"
+	"path"
+	"syscall"
+	"os"
 )
 
-func must(err error) {
+var (
+	// error
+	ErrNoChild      = errors.New("zk: children is nil")
+	ErrNodeNotExist = errors.New("zk: node not exist")
+)
+
+func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func connect() *zk.Conn {
-	servers := strings.Split("127.0.0.1:2181", ",")
-	conn, _, err := zk.Connect(servers, time.Second)
-	must(err)
-	return conn
+// Connect connect to zookeeper, and start a goroutine log the event.
+func Connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
+	conn, _, err := zk.Connect(addr, timeout)
+	if err != nil {
+		log.Error("zk.Connect(\"%v\", %d) error(%v)", addr, timeout, err)
+		return nil, err
+	}
+	/*go func() {
+		for {
+			event := <-session
+			log.Debug("zookeeper get a event: %s", event.State.String())
+		}
+	}()*/
+	return conn, nil
 }
 
-func mirror(conn *zk.Conn, path string) (chan []string, chan error) {
+// Create create zookeeper path, if path exists ignore error
+func Create(conn *zk.Conn, fpath string, data string, flags int32) error {
+	// create zk root path
+	tpath := ""
+	for _, str := range strings.Split(fpath, "/")[1:] {
+		tpath = path.Join(tpath, "/", str)
+		log.Debug("create zookeeper path: \"%s\"", tpath)
+		acl := zk.WorldACL(zk.PermAll)
+		_, err := conn.Create(tpath, []byte(data), flags, acl)
+		if err != nil {
+			if err == zk.ErrNodeExists {
+				log.Warn("zk.create(\"%s\") exists", tpath)
+			} else {
+				log.Error("zk.create(\"%s\") error(%v)", tpath, err)
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+func CreateProtectedEphemeralSequential(conn *zk.Conn, fpath string, data string) (string, error) {
+	acl := zk.WorldACL(zk.PermAll)
+	return conn.CreateProtectedEphemeralSequential(fpath, []byte(data), acl)
+}
+
+// RegisterTmp create a ephemeral node, and watch it, if node droped then send a SIGQUIT to self.
+func RegisterTemp(conn *zk.Conn, fpath string, data []byte) error {
+	tpath, err := conn.Create(path.Join(fpath)+"/", data, zk.FlagEphemeral|zk.FlagSequence, zk.WorldACL(zk.PermAll))
+	if err != nil {
+		log.Error("conn.Create(\"%s\", \"%s\", zk.FlagEphemeral|zk.FlagSequence) error(%v)", fpath, string(data), err)
+		return err
+	}
+	log.Debug("create a zookeeper node:%s", tpath)
+	// watch self
+	go func() {
+		for {
+			log.Info("zk path: \"%s\" set a watch", tpath)
+			exist, _, watch, err := conn.ExistsW(tpath)
+			if err != nil {
+				log.Error("zk.ExistsW(\"%s\") error(%v)", tpath, err)
+				log.Warn("zk path: \"%s\" set watch failed, kill itself", tpath)
+				killSelf()
+				return
+			}
+			if !exist {
+				log.Warn("zk path: \"%s\" not exist, kill itself", tpath)
+				killSelf()
+				return
+			}
+			event := <-watch
+			log.Info("zk path: \"%s\" receive a event %v", tpath, event)
+		}
+	}()
+	return nil
+}
+
+// GetNodesW get all child from zk path with a watch.
+func GetNodesW(conn *zk.Conn, path string) (chan []string, chan error) {
 	snapshots := make(chan []string)
 	errors := make(chan error)
 
@@ -28,6 +105,7 @@ func mirror(conn *zk.Conn, path string) (chan []string, chan error) {
 		for {
 			snapshot, _, events, err := conn.ChildrenW(path)
 			if err != nil {
+				log.Error("zk.ChildrenW(\"%s\") error(%v)", path, err)
 				errors <- err
 				return
 			}
@@ -43,49 +121,35 @@ func mirror(conn *zk.Conn, path string) (chan []string, chan error) {
 	return snapshots, errors
 }
 
-func main() {
-	conn1 := connect()
-	defer conn1.Close()
-
-	flags := int32(zk.FlagEphemeral)
-	acl := zk.WorldACL(zk.PermAll)
-
-	_, err := conn1.Create("/mirror", nil, int32(0), acl)
+// GetNodes get all child from zk path.
+func GetNodes(conn *zk.Conn, path string) ([]string, error) {
+	nodes, stat, err := conn.Children(path)
 	if err != nil {
-		fmt.Printf("create: %+v\n", err)
-	}
-
-	snapshots, errors := mirror(conn1, "/mirror")
-	go func() {
-		for {
-			select {
-			case snapshot := <-snapshots:
-				fmt.Printf("%+v\n", snapshot)
-			case err := <-errors:
-				fmt.Printf("%+v\n", err)
-			}
+		if err == zk.ErrNoNode {
+			return nil, ErrNodeNotExist
 		}
-	}()
+		log.Error("zk.Children(\"%s\") error(%v)", path, err)
+		return nil, err
+	}
+	if stat == nil {
+		return nil, ErrNodeNotExist
+	}
+	if len(nodes) == 0 {
+		return nil, ErrNoChild
+	}
+	return nodes, nil
+}
 
-	conn2 := connect()
-	time.Sleep(time.Second)
+func Delete(conn *zk.Conn, path string) error {
+	return conn.Delete(path, 0)
+}
+func Exists(conn *zk.Conn, path string) (bool, error) {
+	b, _, e := conn.Exists(path)
+	return b, e;
+}
 
-	_, err = conn2.Create("/mirror/one", []byte("one"), flags, acl)
-	must(err)
-	time.Sleep(time.Second)
-
-	_, err = conn2.Create("/mirror/two", []byte("two"), flags, acl)
-	must(err)
-	time.Sleep(time.Second)
-
-	err = conn1.Delete("/mirror/two", 0)
-	must(err)
-	time.Sleep(time.Second)
-
-	_, err = conn2.Create("/mirror/three", []byte("three"), flags, acl)
-	must(err)
-	time.Sleep(time.Second)
-
-	conn2.Close()
-	time.Sleep(time.Second)
+func killSelf() {
+	if err := syscall.Kill(os.Getpid(), syscall.SIGQUIT); err != nil {
+		log.Error("syscall.Kill(%d, SIGQUIT) error(%v)", os.Getpid(), err)
+	}
 }
