@@ -2,7 +2,7 @@ package core
 
 import (
 	log "github.com/alecthomas/log4go"
-	"github.com/samuel/go-zookeeper/zk"
+	zookeeper "github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
 	"errors"
@@ -17,15 +17,28 @@ var (
 	ErrNodeNotExist = errors.New("zk: node not exist")
 )
 
+type ZKUtil struct {
+}
+
 func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
+var conn *zookeeper.Conn
+
+func InitZk() {
+	v := new(ZKConfig)
+	var zkConfig = v.getZkConfig()
+	servers := strings.Split(zkConfig.Zk_path, ",")
+	var zkUtil = new(ZKUtil)
+	conn, _ = zkUtil.Connect(servers, time.Second)
+}
+
 // Connect connect to zookeeper, and start a goroutine log the event.
-func Connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
-	conn, _, err := zk.Connect(addr, timeout)
+func (zkUtil *ZKUtil) Connect(addr []string, timeout time.Duration) (*zookeeper.Conn, error) {
+	conn, _, err := zookeeper.Connect(addr, timeout)
 	if err != nil {
 		log.Error("zk.Connect(\"%v\", %d) error(%v)", addr, timeout, err)
 		return nil, err
@@ -40,16 +53,16 @@ func Connect(addr []string, timeout time.Duration) (*zk.Conn, error) {
 }
 
 // Create create zookeeper path, if path exists ignore error
-func Create(conn *zk.Conn, fpath string, data string, flags int32) error {
+func (zkUtil *ZKUtil) Create(fpath string, data string, flags int32) error {
 	// create zk root path
 	tpath := ""
 	for _, str := range strings.Split(fpath, "/")[1:] {
 		tpath = path.Join(tpath, "/", str)
 		log.Debug("create zookeeper path: \"%s\"", tpath)
-		acl := zk.WorldACL(zk.PermAll)
+		acl := zookeeper.WorldACL(zookeeper.PermAll)
 		_, err := conn.Create(tpath, []byte(data), flags, acl)
 		if err != nil {
-			if err == zk.ErrNodeExists {
+			if err == zookeeper.ErrNodeExists {
 				log.Warn("zk.create(\"%s\") exists", tpath)
 			} else {
 				log.Error("zk.create(\"%s\") error(%v)", tpath, err)
@@ -60,14 +73,14 @@ func Create(conn *zk.Conn, fpath string, data string, flags int32) error {
 
 	return nil
 }
-func CreateProtectedEphemeralSequential(conn *zk.Conn, fpath string, data string) (string, error) {
-	acl := zk.WorldACL(zk.PermAll)
+func (zkUtil *ZKUtil) CreateProtectedEphemeralSequential(fpath string, data string) (string, error) {
+	acl := zookeeper.WorldACL(zookeeper.PermAll)
 	return conn.CreateProtectedEphemeralSequential(fpath, []byte(data), acl)
 }
 
 // RegisterTmp create a ephemeral node, and watch it, if node droped then send a SIGQUIT to self.
-func RegisterTemp(conn *zk.Conn, fpath string, data []byte) error {
-	tpath, err := conn.Create(path.Join(fpath)+"/", data, zk.FlagEphemeral|zk.FlagSequence, zk.WorldACL(zk.PermAll))
+func (zkUtil *ZKUtil) RegisterTemp(fpath string, data []byte) error {
+	tpath, err := conn.Create(path.Join(fpath)+"/", data, zookeeper.FlagEphemeral|zookeeper.FlagSequence, zookeeper.WorldACL(zookeeper.PermAll))
 	if err != nil {
 		log.Error("conn.Create(\"%s\", \"%s\", zk.FlagEphemeral|zk.FlagSequence) error(%v)", fpath, string(data), err)
 		return err
@@ -97,7 +110,7 @@ func RegisterTemp(conn *zk.Conn, fpath string, data []byte) error {
 }
 
 // GetNodesW get all child from zk path with a watch.
-func GetNodesW(conn *zk.Conn, path string) (chan []string, chan error) {
+func (zkUtil *ZKUtil) GetNodesW(path string) (chan []string, chan error) {
 	snapshots := make(chan []string)
 	errors := make(chan error)
 
@@ -122,10 +135,10 @@ func GetNodesW(conn *zk.Conn, path string) (chan []string, chan error) {
 }
 
 // GetNodes get all child from zk path.
-func GetNodes(conn *zk.Conn, path string) ([]string, error) {
+func (zkUtil *ZKUtil) GetNodes(path string) ([]string, error) {
 	nodes, stat, err := conn.Children(path)
 	if err != nil {
-		if err == zk.ErrNoNode {
+		if err == zookeeper.ErrNoNode {
 			return nil, ErrNodeNotExist
 		}
 		log.Error("zk.Children(\"%s\") error(%v)", path, err)
@@ -140,12 +153,18 @@ func GetNodes(conn *zk.Conn, path string) ([]string, error) {
 	return nodes, nil
 }
 
-func Delete(conn *zk.Conn, path string) error {
+func (zkUtil *ZKUtil) Delete(path string) error {
 	return conn.Delete(path, 0)
 }
-func Exists(conn *zk.Conn, path string) (bool, error) {
+
+func (zkUtil *ZKUtil) Exists(path string) (bool, error) {
 	b, _, e := conn.Exists(path)
 	return b, e;
+}
+
+func (zkUtil *ZKUtil) Close() {
+	conn.Close()
+	log.Info("zk client close")
 }
 
 func killSelf() {

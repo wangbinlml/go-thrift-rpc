@@ -1,9 +1,5 @@
 {
   "acceptor":{
-    "name": "biz_service",
-    "service": "/platform/biz_platform/biz_service",
-    "ip": "127.0.0.1",
-    "port": "9080"
   },
   "connector":[
     {

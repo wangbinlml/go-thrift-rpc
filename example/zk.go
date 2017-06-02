@@ -3,25 +3,24 @@ package main
 import (
 	"fmt"
 	log "github.com/alecthomas/log4go"
-	"github.com/wangbinlml/go-thrift-rpc/core"
-	"strings"
+	_ "github.com/wangbinlml/go-thrift-rpc/core"
 	"time"
 	"github.com/samuel/go-zookeeper/zk"
+	"github.com/wangbinlml/go-thrift-rpc/core"
 )
 
 func main() {
-	servers := strings.Split("127.0.0.1:2181", ",")
-	conn1, _ := core.Connect(servers, time.Second)
-	defer conn1.Close()
+
+	var zkUtil = new(core.ZKUtil)
 
 	flags := int32(zk.FlagEphemeral)
 
-	err := core.Create(conn1, "/mirror", "", int32(0))
+	err := zkUtil.Create("/mirror", "", int32(0))
 	if err != nil {
 		fmt.Printf("create: %+v\n", err)
 	}
 
-	snapshots, errors := core.GetNodesW(conn1, "/mirror")
+	snapshots, errors := zkUtil.GetNodesW("/mirror")
 	go func() {
 		for {
 			select {
@@ -34,23 +33,21 @@ func main() {
 		}
 	}()
 
-	conn2, _ := core.Connect(servers, time.Second)
-	defer conn2.Close()
 	time.Sleep(time.Second)
 
-	err = core.Create(conn2, "/mirror/one", "one", flags)
+	err = zkUtil.Create("/mirror/one", "one", flags)
 	core.Must(err)
 	time.Sleep(time.Second)
 
-	err = core.Create(conn2, "/mirror/two", "two", flags)
+	err = zkUtil.Create("/mirror/two", "two", flags)
 	core.Must(err)
 	time.Sleep(time.Second)
 
-	err = core.Delete(conn2, "/mirror/two")
+	err = zkUtil.Delete( "/mirror/two")
 	core.Must(err)
 	time.Sleep(time.Second)
 
-	err = core.Create(conn2, "/mirror/three", "three", flags)
+	err = zkUtil.Create("/mirror/three", "three", flags)
 	core.Must(err)
 	time.Sleep(time.Second)
 

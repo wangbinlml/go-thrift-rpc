@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
+	_ "github.com/wangbinlml/go-thrift-rpc/core"
 	"github.com/wangbinlml/go-thrift-rpc/core"
 )
 const (

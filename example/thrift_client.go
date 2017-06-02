@@ -2,6 +2,7 @@ package main
 
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
+	_ "github.com/wangbinlml/go-thrift-rpc/core"
 	"net"
 	"fmt"
 	"os"
@@ -28,7 +29,7 @@ func main() {
 	defer transport.Close()
 
 	startTime := currentTimeMillis()
-	for i := 0; i < 10000000; i++ {
+	for i := 0; i < 100; i++ {
 
 		header := &rpc.Header{
 		}

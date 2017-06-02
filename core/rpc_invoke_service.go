@@ -6,7 +6,6 @@ import (
 )
 
 type RPCInvokeServiceImpl struct {
-
 }
 
 func (this *RPCInvokeServiceImpl) Invoke(serviceName string, methodName string, msg *rpc.Msg) (r *rpc.Msg, err error) {
