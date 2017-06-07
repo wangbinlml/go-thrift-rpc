@@ -80,7 +80,7 @@ func (connector *ThriftConnector) createServer(serviceName string, ip string, po
 		fmt.Fprintln(os.Stderr, "Error opening socket to "+ip+":"+port, " ", err)
 		os.Exit(1)
 	}
-	defer transport.Close()
+	//defer transport.Close()
 }
 
 func (connector *ThriftConnector) Invoke(service string, method string, msg *rpc.Msg) (*rpc.Msg, error) {
