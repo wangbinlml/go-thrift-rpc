@@ -6,11 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"runtime"
 )
 func main() {
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	var configFile = "example/biz/config"
 	rpc := core.Rpc{}
 	app := rpc.CreateApp(configFile)

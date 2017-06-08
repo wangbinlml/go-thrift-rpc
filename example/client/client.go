@@ -9,7 +9,6 @@ import (
 	"os"
 	"syscall"
 	"os/signal"
-	"runtime"
 )
 
 func SayHello(w http.ResponseWriter, req *http.Request) {
@@ -37,7 +36,7 @@ func SayHello(w http.ResponseWriter, req *http.Request) {
 func main() {
 
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	go startRpc()
 	go startHttp()
 
