@@ -3,6 +3,7 @@ package core
 import (
 	io "io/ioutil"
 	"github.com/tidwall/gjson"
+	"time"
 )
 
 var rpcConfig RpcConfig
@@ -21,11 +22,9 @@ type ConnectorConfig struct {
 	Name          string `json:"name"`
 	Service       string `json:"service"`
 	Version    string `json:"version"`
-	RetryTime     string `json:"retryTime"`
-	RetryInterval string `json:"retryInterval"`
-	MaxPoolSize   string `json:"maxPoolSize"`
-	MinPoolSize   string `json:"minPoolSize"`
-	IdleTimeout   string `json:"idleTimeout"`
+	Capacity   int `json:"capacity"`
+	MaxCap   int `json:"maxCap"`
+	IdleTimeout   time.Duration `json:"idleTimeout"`
 }
 
 type RpcConfig struct {

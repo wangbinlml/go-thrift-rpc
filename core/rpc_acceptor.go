@@ -67,6 +67,6 @@ func (acceptor *ThriftAcceptor) start() {
 	path = path + "/" + acceptor.Host + ":" + acceptor.Port + ":" + acceptor.Weight;
 	err = zkUtil.Create(path, "", flags)
 	Must(err)
-	log.Info("ThriftAcceptor start " + path)
-	server.Serve()
+	log.Info("start thrift rpc listen addr: %s", path)
+	go server.Serve()
 }

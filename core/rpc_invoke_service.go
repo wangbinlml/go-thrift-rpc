@@ -1,8 +1,8 @@
 package core
 
-import "fmt"
 import (
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
+	"fmt"
 )
 
 type RPCInvokeServiceImpl struct {
