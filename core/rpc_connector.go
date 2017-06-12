@@ -71,7 +71,7 @@ type ResourceConn struct {
 
 func (r ResourceConn) Close() {
 	log.Info("Transport Close")
-	r.client.Transport.Close()
+	//r.client.Transport.Close()
 }
 
 func (connector *ThriftConnector) createServer(connectorObj ConnectorConfig, serviceName string, ip string, port string) {
