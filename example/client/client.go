@@ -49,7 +49,11 @@ func main() {
 
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	//启动RPC
 	go startRpc()
+
+	//启动HTTP
 	go startHttp()
 
 	sc := make(chan os.Signal, 1)
@@ -58,6 +62,7 @@ func main() {
 }
 
 func startHttp() {
+	//传递处理请求方法
 	http.HandleFunc("/hello", SayHello)
 	http.ListenAndServe(":8001", nil)
 	fmt.Println("start http server .....")
@@ -66,7 +71,11 @@ func startHttp() {
 func startRpc() {
 	var configFile = "example/client/config"
 	var biz = make(map[string]core.IBizDispatcher)
+
+	//创建RPC框架
 	rpc := core.Rpc{}
 	app := rpc.CreateApp(configFile, biz)
+
+	//启动RPC框架
 	app.Start()
 }
