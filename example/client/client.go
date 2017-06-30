@@ -9,9 +9,16 @@ import (
 	"os"
 	"syscall"
 	"os/signal"
+	"runtime"
+	"time"
 )
 
+// 转换成毫秒
+func currentTimeMillis() int64 {
+	return time.Now().UnixNano() / 1000000
+}
 func SayHello(w http.ResponseWriter, req *http.Request) {
+	startTime := currentTimeMillis()
 
 	header := &rpc.Header{
 	}
@@ -25,6 +32,10 @@ func SayHello(w http.ResponseWriter, req *http.Request) {
 	rpc2 := core.Rpc{}
 	client := rpc2.GetRpcService()
 	r1, error := client.Invoke("biz_service", "login", msg)
+
+	endTime := currentTimeMillis()
+	fmt.Println("Program exit. time->", endTime, startTime, (endTime - startTime))
+
 	if error != nil {
 		fmt.Println(error)
 		w.Write([]byte("error"))
@@ -32,11 +43,12 @@ func SayHello(w http.ResponseWriter, req *http.Request) {
 		body := r1.GetBody()
 		w.Write([]byte(body))
 	}
+
 }
 func main() {
 
 	flag.Parse()
-
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	go startRpc()
 	go startHttp()
 
@@ -53,7 +65,8 @@ func startHttp() {
 
 func startRpc() {
 	var configFile = "example/client/config"
+	var biz = make(map[string]core.IBizDispatcher)
 	rpc := core.Rpc{}
-	app := rpc.CreateApp(configFile)
+	app := rpc.CreateApp(configFile, biz)
 	app.Start()
 }
