@@ -10,7 +10,7 @@ type ApplicationImpl struct {
 var connectorConfig []ConnectorConfig
 var acceptorConfig AcceptorConfig
 
-func (app *ApplicationImpl) Init() *ApplicationImpl {
+func (app *ApplicationImpl) Init(biz map[string]IBizDispatcher) *ApplicationImpl {
 	var r = new(RpcConfig)
 	var rpcConfig = r.getRpcConfig()
 	rpcClient := RpcClientImpl{}
@@ -21,7 +21,7 @@ func (app *ApplicationImpl) Init() *ApplicationImpl {
 		rpcClient.init(connectorConfig)
 	}
 	if acceptorConfig.Service != "" {
-		rpcServer.init(rpcConfig.Acceptor)
+		rpcServer.init(rpcConfig.Acceptor, biz)
 	}
 
 	log.Info("application init.")

@@ -7,13 +7,14 @@ import (
 var thriftAcceptor = new(ThriftAcceptor)
 type RpcServer interface {
 	init()
+	initBiz()
 	start()
 }
 type RpcServerImpl struct {
 }
 
-func (server *RpcServerImpl) init(acceptor AcceptorConfig) {
-	thriftAcceptor.init(acceptor)
+func (server *RpcServerImpl) init(acceptor AcceptorConfig, biz map[string] IBizDispatcher) {
+	thriftAcceptor.init(acceptor, biz)
 	log.Info("rpcServer init.")
 }
 func (server *RpcServerImpl) start() {

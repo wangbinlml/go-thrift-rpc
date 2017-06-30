@@ -5,12 +5,21 @@ import (
 	"fmt"
 )
 
-type RPCInvokeServiceImpl struct {
+type IBizDispatcher interface {
+	Dispatch(service string, method string, msg *rpc.Msg) (msg2 *rpc.Msg, err error)
 }
 
-func (this *RPCInvokeServiceImpl) Invoke(serviceName string, methodName string, msg *rpc.Msg) (r *rpc.Msg, err error) {
-	body := msg.GetBody()
-	fmt.Println("serviceName: " + serviceName + "===Body: ",body)
-	msg.Body = body+" world!!"
-	return msg, nil
+type RPCInvokeServiceImpl struct {
+	service map[string]IBizDispatcher
+}
+
+func (rpc *RPCInvokeServiceImpl) Invoke(serviceName string, methodName string, msg *rpc.Msg) (r *rpc.Msg, err error) {
+	fmt.Println("serviceName: " + serviceName)
+	var dis IBizDispatcher
+	for k, v := range rpc.service {
+		if k == serviceName {
+			dis = v
+		}
+	}
+	return dis.Dispatch(serviceName, methodName, msg)
 }

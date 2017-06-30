@@ -18,9 +18,13 @@ type ThriftAcceptor struct {
 	Version string
 	Weight  string
 	ZkPath  string
+	biz     map[string]IBizDispatcher
 }
 
-func (acceptor *ThriftAcceptor) init(ac AcceptorConfig) {
+func (acceptor *ThriftAcceptor) initBiz() {
+	log.Info("ThriftAcceptor initBiz")
+}
+func (acceptor *ThriftAcceptor) init(ac AcceptorConfig, biz map[string]IBizDispatcher) {
 	acceptor.Host = ac.Ip
 	acceptor.Port = ac.Port
 	acceptor.Name = ac.Name
@@ -35,6 +39,8 @@ func (acceptor *ThriftAcceptor) init(ac AcceptorConfig) {
 		acceptor.Weight = ac.Weight
 	}
 	acceptor.ZkPath = ac.Service
+	acceptor.biz = biz
+	acceptor.initBiz()
 	log.Info("ThriftAcceptor init")
 }
 
@@ -50,7 +56,7 @@ func (acceptor *ThriftAcceptor) start() {
 		os.Exit(1)
 	}
 
-	handler := &RPCInvokeServiceImpl{}
+	handler := &RPCInvokeServiceImpl{acceptor.biz}
 	processor := rpc.NewRPCInvokeServiceProcessor(handler)
 
 	server := thrift.NewTSimpleServer4(processor, serverTransport, transportFactory, protocolFactory)

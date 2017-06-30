@@ -14,17 +14,17 @@ type AcceptorConfig struct {
 	Service string `json:"service"`
 	Ip      string `json:"ip"`
 	Port    string `json:"port"`
-	Version    string `json:"version"`
-	Weight    string `json:"weight"`
+	Version string `json:"version"`
+	Weight  string `json:"weight"`
 }
 
 type ConnectorConfig struct {
-	Name          string `json:"name"`
-	Service       string `json:"service"`
-	Version    string `json:"version"`
-	Capacity   int `json:"capacity"`
-	MaxCap   int `json:"maxCap"`
-	IdleTimeout   time.Duration `json:"idleTimeout"`
+	Name        string `json:"name"`
+	Service     string `json:"service"`
+	Version     string `json:"version"`
+	Capacity    int `json:"capacity"`
+	MaxCap      int `json:"maxCap"`
+	IdleTimeout time.Duration `json:"idleTimeout"`
 }
 
 type RpcConfig struct {
@@ -42,7 +42,6 @@ type ZKConfig struct {
 	Zk_option ZKConfigOption `json:"zk_option"`
 }
 
-
 func Load(filename string) []byte {
 	data, err := io.ReadFile(filename)
 	if err != nil {
@@ -52,20 +51,20 @@ func Load(filename string) []byte {
 	return datajson
 }
 
-func InitConfig(configPath string)  {
+func InitConfig(configPath string) {
 	data := Load(configPath + "/rpcServiceConfig.json")
 	rpcConfig.Acceptor = AcceptorConfig{}
 	rpcConfig.Connector = []ConnectorConfig{}
 	gjson.Unmarshal(data, &rpcConfig)
 
 	zkConfig.Zk_option = ZKConfigOption{}
-	gjson.Unmarshal(Load(configPath + "/config.json"), &zkConfig)
+	gjson.Unmarshal(Load(configPath+"/config.json"), &zkConfig)
 }
 
-func (config * RpcConfig) getRpcConfig() RpcConfig {
+func (config *RpcConfig) getRpcConfig() RpcConfig {
 	return rpcConfig
 }
 
-func (config * ZKConfig) getZkConfig() ZKConfig {
+func (config *ZKConfig) getZkConfig() ZKConfig {
 	return zkConfig
 }

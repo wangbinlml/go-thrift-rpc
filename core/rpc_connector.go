@@ -54,7 +54,7 @@ func (connector *ThriftConnector) initThrift(connectorObj ConnectorConfig) {
 					for _, url := range snapshot {
 						path := strings.Split(url, ":")
 						log.Info("connector path " + path[0] + ":" + path[1])
-						connector.createServer(connectorObj,serviceName, path[0], path[1])
+						connector.createServer(connectorObj, serviceName, path[0], path[1])
 					}
 				}
 				fmt.Printf("%+v\n", snapshot)
@@ -108,7 +108,7 @@ func (connector *ThriftConnector) Invoke(service string, method string, msg *rpc
 			var resource, el = pool.Get(ctx)
 			defer pool.Put(resource)
 			if el == nil {
-				conn:= resource.(*ResourceConn)
+				conn := resource.(*ResourceConn)
 				rmsg, el = conn.client.Invoke(service, method, msg)
 			}
 			return rmsg, el
