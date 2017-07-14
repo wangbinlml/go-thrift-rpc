@@ -41,6 +41,7 @@ func SayHello(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("error"))
 	} else {
 		body := r1.GetBody()
+		fmt.Println(r1.Header.Tid)
 		w.Write([]byte(body))
 	}
 
