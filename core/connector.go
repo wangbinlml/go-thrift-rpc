@@ -11,6 +11,7 @@ import (
 	"errors"
 	"strings"
 	"golang.org/x/net/context"
+	"github.com/satori/go.uuid"
 )
 
 var serviceMap = make(map[string]*pools.ResourcePool)
@@ -100,6 +101,11 @@ func (connector *ThriftConnector) createServer(connectorObj ConnectorConfig, ser
 }
 
 func (connector *ThriftConnector) Invoke(service string, method string, msg *rpc.Msg) (*rpc.Msg, error) {
+	tid := uuid.NewV4()
+	header := msg.Header
+	header.Tid = tid.String()
+	msg.Header = header
+
 	if serviceName, ok := sMap[service]; ok {
 		if pool, ok := serviceMap[serviceName]; ok {
 			//defer pool.Close()
