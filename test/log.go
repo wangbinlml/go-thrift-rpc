@@ -5,7 +5,7 @@ import (
 )
 func main()  {
 	logs.SetLogger("console")
-	logs.SetLogger(logs.AdapterFile,`{"filename":"/home/wangbin/workspace/golang/src/github.com/wangbinlml/go-thrift-rpc/logs/project.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
+	//logs.SetLogger(logs.AdapterFile,`{"filename":"/tmp/project.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 	logs.SetLevel(7)
 	l := logs.GetLogger()
 	l.Println("this is a message of http")
