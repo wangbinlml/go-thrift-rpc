@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	filename := "/home/wangbin/workspace/golang/src/github.com/wangbinlml/go-thrift-rpc/config/log4go.json"
+	filename := "../config/log4go.json"
 	config := string(core.LoadFile(filename))
 	logs.SetLogger("console")
 	logs.SetLogger(logs.AdapterFile, config)
