@@ -7,11 +7,11 @@ import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"net"
 	"os"
-	"github.com/youtube/vitess/go/pools"
 	"errors"
 	"strings"
 	"golang.org/x/net/context"
 	"github.com/satori/go.uuid"
+	"github.com/youtube/vitess/pools"
 )
 
 var serviceMap = make(map[string]*pools.ResourcePool)

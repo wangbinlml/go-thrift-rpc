@@ -22,8 +22,8 @@ type ConnectorConfig struct {
 	Name        string `json:"name"`
 	Service     string `json:"service"`
 	Version     string `json:"version"`
-	Capacity    int `json:"capacity"`
-	MaxCap      int `json:"maxCap"`
+	Capacity    int32 `json:"capacity"`
+	MaxCap      int32 `json:"maxCap"`
 	IdleTimeout time.Duration `json:"idleTimeout"`
 }
 
