@@ -1,41 +1,20 @@
 package main
 
 import (
-	"github.com/op/go-logging"
-	"os"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 )
-var log = logging.MustGetLogger("example")
-var format = logging.MustStringFormatter(
-	`%{color}%{time} %{module} [%{level}] %{shortfunc} - %{message}`,
-)
-// Password is just an example type implementing the Redactor interface. Any
-// time this is logged, the Redacted() function will be called.
-type Password string
+func main()  {
+	logs.SetLogger("console")
+	logs.SetLogger(logs.AdapterFile,`{"filename":"/home/wangbin/workspace/golang/src/github.com/wangbinlml/go-thrift-rpc/logs/project.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
+	logs.SetLevel(7)
+	l := logs.GetLogger()
+	l.Println("this is a message of http")
+	//an official log.Logger with prefix ORM
+	logs.GetLogger("ORM").Println("this is a message of orm")
 
-func (p Password) Redacted() interface{} {
-	return logging.Redact(string(p))
-}
-func main(){
-	// For demo purposes, create two backend for os.Stderr.
-	//backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
-
-	// For messages written to backend2 we want to add some additional
-	// information to the output, including the used log level and the name of
-	// the function.
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
-
-	// Only errors and more severe messages should be sent to backend1
-	backend1Leveled := logging.AddModuleLevel(backend2)
-	backend1Leveled.SetLevel(logging.ERROR, "")
-
-	// Set the backends to be used.
-	logging.SetBackend(backend1Leveled, backend2Formatter)
-
-	log.Debugf("debug %s", Password("secret"))
-	log.Info("info")
-	log.Notice("notice")
-	log.Warning("warning")
-	log.Error("err")
-	log.Critical("crit")
+	logs.Debug("my book is bought in the year of ", 2016)
+	logs.Info("this %s cat is %v years old", "yellow", 3)
+	logs.Warn("json is a type of kv like", map[string]int{"key": 2016})
+	logs.Error(1024, "is a very", "good game")
+	logs.Critical("oh,crash")
 }
