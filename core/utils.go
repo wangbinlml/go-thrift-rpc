@@ -3,6 +3,7 @@ package core
 import (
 	"reflect"
 	"fmt"
+	io "io/ioutil"
 )
 
 func Switch(value reflect.Value) {
@@ -35,6 +36,16 @@ func parseStruct(value reflect.Value) {
 		Switch(field)
 	}
 }
+
+func LoadFile(filename string) []byte {
+	data, err := io.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+	datajson := []byte(data)
+	return datajson
+}
+
 
 //Usege
 /*
