@@ -1,7 +1,7 @@
 package core
 
 import (
-	log "github.com/alecthomas/log4go"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 )
 
 var thriftAcceptor = new(ThriftAcceptor)
@@ -15,9 +15,9 @@ type RpcServerImpl struct {
 
 func (server *RpcServerImpl) init(acceptor AcceptorConfig, biz map[string] IBizDispatcher) {
 	thriftAcceptor.init(acceptor, biz)
-	log.Info("rpcServer init.")
+	logs.Info("rpcServer init.")
 }
 func (server *RpcServerImpl) start() {
 	thriftAcceptor.start()
-	log.Info("rpcServer start.")
+	logs.Info("rpcServer start.")
 }

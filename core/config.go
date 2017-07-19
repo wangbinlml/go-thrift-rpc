@@ -3,6 +3,7 @@ package core
 import (
 	io "io/ioutil"
 	"github.com/tidwall/gjson"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	"time"
 )
 
@@ -59,6 +60,14 @@ func InitConfig(configPath string) {
 
 	zkConfig.Zk_option = ZKConfigOption{}
 	gjson.Unmarshal(Load(configPath+"/config.json"), &zkConfig)
+}
+
+func InitLog(configPath string)  {
+	logConfig := string(Load(configPath+"/log4go.json"))
+	logs.SetLogger("console")
+	logs.SetLogger(logs.AdapterFile, logConfig)
+	//日志默认不输出调用的文件名和文件行号
+	logs.EnableFuncCallDepth(true)
 }
 
 func (config *RpcConfig) getRpcConfig() RpcConfig {

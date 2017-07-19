@@ -1,7 +1,7 @@
 package core
 
 import (
-	log "github.com/alecthomas/log4go"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	zookeeper "github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
@@ -40,7 +40,7 @@ func InitZk() {
 func (zkUtil *ZKUtil) Connect(addr []string, timeout time.Duration) (*zookeeper.Conn, error) {
 	conn, _, err := zookeeper.Connect(addr, timeout)
 	if err != nil {
-		log.Error("zk.Connect(\"%v\", %d) error(%v)", addr, timeout, err)
+		logs.Error("zk.Connect(\"%v\", %d) error(%v)", addr, timeout, err)
 		return nil, err
 	}
 	/*go func() {
@@ -58,14 +58,14 @@ func (zkUtil *ZKUtil) Create(fpath string, data string, flags int32) error {
 	tpath := ""
 	for _, str := range strings.Split(fpath, "/")[1:] {
 		tpath = path.Join(tpath, "/", str)
-		log.Debug("create zookeeper path: \"%s\"", tpath)
+		logs.Debug("create zookeeper path: \"%s\"", tpath)
 		acl := zookeeper.WorldACL(zookeeper.PermAll)
 		_, err := conn.Create(tpath, []byte(data), flags, acl)
 		if err != nil {
 			if err == zookeeper.ErrNodeExists {
-				log.Warn("zk.create(\"%s\") exists", tpath)
+				logs.Warn("zk.create(\"%s\") exists", tpath)
 			} else {
-				log.Error("zk.create(\"%s\") error(%v)", tpath, err)
+				logs.Error("zk.create(\"%s\") error(%v)", tpath, err)
 				return err
 			}
 		}
@@ -82,28 +82,28 @@ func (zkUtil *ZKUtil) CreateProtectedEphemeralSequential(fpath string, data stri
 func (zkUtil *ZKUtil) RegisterTemp(fpath string, data []byte) error {
 	tpath, err := conn.Create(path.Join(fpath)+"/", data, zookeeper.FlagEphemeral|zookeeper.FlagSequence, zookeeper.WorldACL(zookeeper.PermAll))
 	if err != nil {
-		log.Error("conn.Create(\"%s\", \"%s\", zk.FlagEphemeral|zk.FlagSequence) error(%v)", fpath, string(data), err)
+		logs.Error("conn.Create(\"%s\", \"%s\", zk.FlagEphemeral|zk.FlagSequence) error(%v)", fpath, string(data), err)
 		return err
 	}
-	log.Debug("create a zookeeper node:%s", tpath)
+	logs.Debug("create a zookeeper node:%s", tpath)
 	// watch self
 	go func() {
 		for {
-			log.Info("zk path: \"%s\" set a watch", tpath)
+			logs.Info("zk path: \"%s\" set a watch", tpath)
 			exist, _, watch, err := conn.ExistsW(tpath)
 			if err != nil {
-				log.Error("zk.ExistsW(\"%s\") error(%v)", tpath, err)
-				log.Warn("zk path: \"%s\" set watch failed, kill itself", tpath)
+				logs.Error("zk.ExistsW(\"%s\") error(%v)", tpath, err)
+				logs.Warn("zk path: \"%s\" set watch failed, kill itself", tpath)
 				killSelf()
 				return
 			}
 			if !exist {
-				log.Warn("zk path: \"%s\" not exist, kill itself", tpath)
+				logs.Warn("zk path: \"%s\" not exist, kill itself", tpath)
 				killSelf()
 				return
 			}
 			event := <-watch
-			log.Info("zk path: \"%s\" receive a event %v", tpath, event)
+			logs.Info("zk path: \"%s\" receive a event %v", tpath, event)
 		}
 	}()
 	return nil
@@ -118,7 +118,7 @@ func (zkUtil *ZKUtil) GetNodesW(path string) (chan []string, chan error) {
 		for {
 			snapshot, _, events, err := conn.ChildrenW(path)
 			if err != nil {
-				log.Error("zk.ChildrenW(\"%s\") error(%v)", path, err)
+				logs.Error("zk.ChildrenW(\"%s\") error(%v)", path, err)
 				errors <- err
 				return
 			}
@@ -141,7 +141,7 @@ func (zkUtil *ZKUtil) GetNodes(path string) ([]string, error) {
 		if err == zookeeper.ErrNoNode {
 			return nil, ErrNodeNotExist
 		}
-		log.Error("zk.Children(\"%s\") error(%v)", path, err)
+		logs.Error("zk.Children(\"%s\") error(%v)", path, err)
 		return nil, err
 	}
 	if stat == nil {
@@ -164,11 +164,11 @@ func (zkUtil *ZKUtil) Exists(path string) (bool, error) {
 
 func (zkUtil *ZKUtil) Close() {
 	conn.Close()
-	log.Info("zk client close")
+	logs.Info("zk client close")
 }
 
 func killSelf() {
 	if err := syscall.Kill(os.Getpid(), syscall.SIGQUIT); err != nil {
-		log.Error("syscall.Kill(%d, SIGQUIT) error(%v)", os.Getpid(), err)
+		logs.Error("syscall.Kill(%d, SIGQUIT) error(%v)", os.Getpid(), err)
 	}
 }

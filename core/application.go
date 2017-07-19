@@ -1,7 +1,7 @@
 package core
 
 import (
-	log "github.com/alecthomas/log4go"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 )
 
 type ApplicationImpl struct {
@@ -10,9 +10,16 @@ type ApplicationImpl struct {
 var connectorConfig []ConnectorConfig
 var acceptorConfig AcceptorConfig
 
-func (app *ApplicationImpl) Init(biz map[string]IBizDispatcher) *ApplicationImpl {
-	var r = new(RpcConfig)
-	var rpcConfig = r.getRpcConfig()
+func (app *ApplicationImpl) Init(configPath string, biz map[string]IBizDispatcher) *ApplicationImpl {
+	//初始化
+	InitLog(configPath)
+	//初始化配置项
+	InitConfig(configPath)
+	//初始化zk
+	InitZk()
+
+	var configInfo = new(RpcConfig)
+	var rpcConfig = configInfo.getRpcConfig()
 	rpcClient := RpcClientImpl{}
 	rpcServer := RpcServerImpl{}
 	connectorConfig = rpcConfig.Connector
@@ -24,7 +31,8 @@ func (app *ApplicationImpl) Init(biz map[string]IBizDispatcher) *ApplicationImpl
 		rpcServer.init(rpcConfig.Acceptor, biz)
 	}
 
-	log.Info("application init.")
+	logs.Info("application init.")
+
 	return app
 }
 func (app *ApplicationImpl) Start() {
@@ -36,7 +44,7 @@ func (app *ApplicationImpl) Start() {
 	if acceptorConfig.Service != "" {
 		rpcServer.start()
 	}
-	log.Info("application Start.")
+	logs.Info("application Start.")
 }
 
 func (app *ApplicationImpl) GetRpcClient() *RpcClientImpl {

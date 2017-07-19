@@ -3,10 +3,9 @@ package core
 import (
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
-	"fmt"
 	zookeeper "github.com/samuel/go-zookeeper/zk"
 	"os"
-	log "github.com/alecthomas/log4go"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 )
 
 var zkUtil = new(ZKUtil)
@@ -22,7 +21,7 @@ type ThriftAcceptor struct {
 }
 
 func (acceptor *ThriftAcceptor) initBiz() {
-	log.Info("ThriftAcceptor initBiz")
+	logs.Info("ThriftAcceptor initBiz")
 }
 func (acceptor *ThriftAcceptor) init(ac AcceptorConfig, biz map[string]IBizDispatcher) {
 	acceptor.Host = ac.Ip
@@ -41,7 +40,7 @@ func (acceptor *ThriftAcceptor) init(ac AcceptorConfig, biz map[string]IBizDispa
 	acceptor.ZkPath = ac.Service
 	acceptor.biz = biz
 	acceptor.initBiz()
-	log.Info("ThriftAcceptor init")
+	logs.Info("ThriftAcceptor init")
 }
 
 func (acceptor *ThriftAcceptor) start() {
@@ -52,7 +51,7 @@ func (acceptor *ThriftAcceptor) start() {
 
 	serverTransport, err := thrift.NewTServerSocket(networkAddr)
 	if err != nil {
-		fmt.Println("Error!", err)
+		logs.Error("Error!", err)
 		os.Exit(1)
 	}
 
@@ -60,7 +59,7 @@ func (acceptor *ThriftAcceptor) start() {
 	processor := rpc.NewRPCInvokeServiceProcessor(handler)
 
 	server := thrift.NewTSimpleServer4(processor, serverTransport, transportFactory, protocolFactory)
-	log.Info("thrift server in " + networkAddr)
+	logs.Info("thrift server in " + networkAddr)
 
 	//注册zk服务
 	path := acceptor.ZkPath + "/" + acceptor.Version
@@ -68,11 +67,11 @@ func (acceptor *ThriftAcceptor) start() {
 
 	err = zkUtil.Create(path, "", int32(0))
 	if err != nil {
-		fmt.Printf("create: %+v\n", err)
+		logs.Error("create: %+v\n", err)
 	}
 	path = path + "/" + acceptor.Host + ":" + acceptor.Port + ":" + acceptor.Weight;
 	err = zkUtil.Create(path, "", flags)
 	Must(err)
-	log.Info("start thrift rpc listen addr: %s", path)
+	logs.Info("start thrift rpc listen addr: %s", path)
 	go server.Serve()
 }

@@ -2,8 +2,7 @@ package core
 
 import (
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
-	log "github.com/alecthomas/log4go"
-	"fmt"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"net"
 	"os"
@@ -23,12 +22,12 @@ type ThriftConnector struct {
 
 func (connector *ThriftConnector) init(c []ConnectorConfig) {
 	connector.Config = c
-	log.Info("ThriftConnector init")
+	logs.Info("ThriftConnector init")
 }
 
 func (connector *ThriftConnector) start() {
 	connector.createConnect()
-	log.Info("ThriftConnector start")
+	logs.Info("ThriftConnector start")
 }
 
 func (connector *ThriftConnector) createConnect() {
@@ -54,13 +53,13 @@ func (connector *ThriftConnector) initThrift(connectorObj ConnectorConfig) {
 					serviceName := connectorObj.Service
 					for _, url := range snapshot {
 						path := strings.Split(url, ":")
-						log.Info("connector path " + path[0] + ":" + path[1])
+						logs.Info("connector path " + path[0] + ":" + path[1])
 						connector.createServer(connectorObj, serviceName, path[0], path[1])
 					}
 				}
-				fmt.Printf("%+v\n", snapshot)
+				logs.Info("connector server ",snapshot)
 			case err := <-errors:
-				fmt.Printf("%+v\n", err)
+				logs.Error("connector server ", err)
 			}
 		}
 	}()
@@ -71,7 +70,7 @@ type ResourceConn struct {
 }
 
 func (r ResourceConn) Close() {
-	log.Info("Transport Close")
+	logs.Info("Transport Close")
 	//r.client.Transport.Close()
 }
 
@@ -83,16 +82,16 @@ func (connector *ThriftConnector) createServer(connectorObj ConnectorConfig, ser
 		addr := net.JoinHostPort(ip, port)
 		transport, err := thrift.NewTSocket(addr) // client端不设置超时
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error resolving address:", err)
-			os.Exit(1)
+			logs.Error(os.Stderr, "error resolving address:", err)
+			//os.Exit(1)
 			return nil, err
 		}
 
 		useTransport := transportFactory.GetTransport(transport)
 		client := rpc.NewRPCInvokeServiceClientFactory(useTransport, protocolFactory)
 		if err = client.Transport.Open(); err != nil {
-			fmt.Fprintln(os.Stderr, "Error opening socket to "+ip+":"+port, " ", err)
-			os.Exit(1)
+			logs.Error(os.Stderr, "Error opening socket to "+ip+":"+port, " ", err)
+			//os.Exit(1)
 			return nil, err
 		}
 		return &ResourceConn{client}, err
@@ -119,11 +118,11 @@ func (connector *ThriftConnector) Invoke(service string, method string, msg *rpc
 			}
 			return rmsg, el
 		} else {
-			fmt.Println("Key Not Found")
+			logs.Error("Key Not Found")
 			return nil, errors.New("Key Not Found")
 		}
 	} else {
-		fmt.Println("Key Not Found")
+		logs.Error("Key Not Found")
 		return nil, errors.New("Connector Not Found")
 	}
 }

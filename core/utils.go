@@ -2,7 +2,7 @@ package core
 
 import (
 	"reflect"
-	"fmt"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	io "io/ioutil"
 )
 
@@ -10,7 +10,7 @@ func Switch(value reflect.Value) {
 	kind := value.Kind()
 	switch kind {
 	case reflect.String:
-		fmt.Printf("string: %s\n", value.String())
+		logs.Info("string: ", value.String())
 	case reflect.Struct:
 		parseStruct(value)
 	case reflect.Slice:
@@ -19,7 +19,7 @@ func Switch(value reflect.Value) {
 		v := reflect.ValueOf(value.Interface())
 		Switch(v)
 	default:
-		fmt.Printf("unknown type: %s\n", kind.String())
+		logs.Info("unknown type: ", kind.String())
 	}
 }
 func parseSlice(value reflect.Value) {
