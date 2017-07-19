@@ -88,6 +88,7 @@ type RpcLogger struct {
 	signalChan          chan string
 	wg                  sync.WaitGroup
 	outputs             []*nameLogger
+	category            string
 }
 
 const defaultAsyncMsgLen = 1e3
@@ -168,6 +169,14 @@ func (bl *RpcLogger) setLogger(adapterName string, configs ...string) error {
 	bl.outputs = append(bl.outputs, &nameLogger{name: adapterName, Logger: lg})
 	return nil
 }
+
+// set log category
+func (bl *RpcLogger) SetCategory(category string) {
+	if category !="" {
+		bl.category = category
+	}
+}
+
 
 // SetLogger provides a given logger adapter into RpcLogger with config string.
 // config need to be correct JSON as string: {"interval":360}.
@@ -252,6 +261,11 @@ func (bl *RpcLogger) writeMsg(logLevel int, msg string, v ...interface{}) error 
 		logLevel = LevelEmergency
 	} else {
 		msg = levelPrefix[logLevel] + msg
+	}
+
+	//set log category
+	if bl.category != "" {
+		msg = "["+strings.ToUpper(bl.category) + "] " + msg
 	}
 
 	if bl.asynchronous {
@@ -506,6 +520,12 @@ func Reset() {
 func Async(msgLen ...int64) *RpcLogger {
 	return rpcLogger.Async(msgLen...)
 }
+
+// SetCategory sets the global log category used by the simple logger.
+func SetCategory(category string) {
+	rpcLogger.SetCategory(category)
+}
+
 
 // SetLevel sets the global log level used by the simple logger.
 func SetLevel(l int) {

@@ -9,6 +9,7 @@ import (
 
 var rpcConfig RpcConfig
 var zkConfig ZKConfig
+var logConfig LogConfig
 
 type AcceptorConfig struct {
 	Name    string `json:"name"`
@@ -43,6 +44,26 @@ type ZKConfig struct {
 	Zk_option ZKConfigOption `json:"zk_option"`
 }
 
+type LogConfig struct {
+	// The opened file
+	Filename   string `json:"filename"`
+
+	// Rotate at line
+	MaxLines         int `json:"maxlines"`
+
+	// Rotate at size
+	MaxSize        int `json:"maxsize"`
+
+	// Rotate daily
+	Daily         bool  `json:"daily"`
+	MaxDays       int64 `json:"maxdays"`
+	Rotate bool `json:"rotate"`
+	Level int `json:"level"`
+	Perm string `json:"perm"`
+	Category string `json:"category"`
+}
+
+
 func Load(filename string) []byte {
 	data, err := io.ReadFile(filename)
 	if err != nil {
@@ -63,9 +84,14 @@ func InitConfig(configPath string) {
 }
 
 func InitLog(configPath string)  {
-	logConfig := string(Load(configPath+"/log4go.json"))
+	data := Load(configPath+"/log4go.json")
+	gjson.Unmarshal(data, &logConfig)
+
+	config := string(data)
 	logs.SetLogger("console")
-	logs.SetLogger(logs.AdapterFile, logConfig)
+	logs.SetLogger(logs.AdapterFile, config)
+	logs.SetCategory(logConfig.Category)
+
 	//日志默认不输出调用的文件名和文件行号
 	logs.EnableFuncCallDepth(true)
 }
