@@ -1,23 +1,20 @@
 package main
 
 import (
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	"github.com/wangbinlml/go-thrift-rpc/core"
+	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 )
 
 func main() {
-	filename := "../config/log4go.json"
-	config := string(core.LoadFile(filename))
-	logs.SetLogger("console")
-	logs.SetLogger(logs.AdapterFile, config)
-	logs.SetLevel(7)
-	//日志默认不输出调用的文件名和文件行号
-	logs.EnableFuncCallDepth(true)
-	l := logs.GetLogger()
+	core.InitLog("test/")
+	l := logs.GetLogger("system")
 	l.Println("this is a message of http")
 	//an official log.Logger with prefix ORM
 	logs.GetLogger("ORM").Println("this is a message of orm")
 
+	logs.Alert("alert")
+	logs.Notice("notice")
+	logs.Emergency("Emergency")
 	logs.Debug("my book is bought in the year of ", 2016)
 	logs.Info("this %s cat is %v years old", "yellow", 3)
 	logs.Warn("json is a type of kv like", map[string]int{"key": 2016})

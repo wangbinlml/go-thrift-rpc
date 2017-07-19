@@ -1,0 +1,10 @@
+{
+  "filename": "/tmp/client.log",
+  "maxlines": 0 ,
+  "maxsize": 0,
+  "daily": true,
+  "maxdays": 0,
+  "rotate": true,
+  "level": 7,
+  "perm": "7777"
+}
