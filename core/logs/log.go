@@ -160,6 +160,7 @@ func (bl *RpcLogger) setLogger(adapterName string, configs ...string) error {
 
 	lg := log()
 	err := lg.Init(config)
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "logs.RpcLogger.SetLogger: "+err.Error())
 		return err
