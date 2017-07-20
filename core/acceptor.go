@@ -23,7 +23,7 @@ type ThriftAcceptor struct {
 func (acceptor *ThriftAcceptor) initBiz() {
 	logs.Info("ThriftAcceptor initBiz")
 }
-func (acceptor *ThriftAcceptor) init(ac AcceptorConfig, biz map[string]IBizDispatcher) {
+func (acceptor *ThriftAcceptor) init(ac AcceptorConfig) {
 	acceptor.Host = ac.Ip
 	acceptor.Port = ac.Port
 	acceptor.Name = ac.Name
@@ -38,9 +38,14 @@ func (acceptor *ThriftAcceptor) init(ac AcceptorConfig, biz map[string]IBizDispa
 		acceptor.Weight = ac.Weight
 	}
 	acceptor.ZkPath = ac.Service
+	logs.Info("ThriftAcceptor init")
+}
+
+//注册业务处理服务
+func (acceptor *ThriftAcceptor) registService(biz map[string]IBizDispatcher) {
 	acceptor.biz = biz
 	acceptor.initBiz()
-	logs.Info("ThriftAcceptor init")
+	logs.Info("Regist server ",biz)
 }
 
 func (acceptor *ThriftAcceptor) start() {

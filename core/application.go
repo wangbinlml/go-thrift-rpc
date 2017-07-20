@@ -10,7 +10,10 @@ type ApplicationImpl struct {
 var connectorConfig []ConnectorConfig
 var acceptorConfig AcceptorConfig
 
-func (app *ApplicationImpl) Init(configPath string, biz map[string]IBizDispatcher) *ApplicationImpl {
+var rpcClient = RpcClientImpl{}
+var rpcServer = RpcServerImpl{}
+
+func (app *ApplicationImpl) Init(configPath string) *ApplicationImpl {
 	//初始化
 	InitLog(configPath)
 	//初始化配置项
@@ -20,21 +23,26 @@ func (app *ApplicationImpl) Init(configPath string, biz map[string]IBizDispatche
 
 	var configInfo = new(RpcConfig)
 	var rpcConfig = configInfo.getRpcConfig()
-	rpcClient := RpcClientImpl{}
-	rpcServer := RpcServerImpl{}
 	connectorConfig = rpcConfig.Connector
 	acceptorConfig = rpcConfig.Acceptor
 	if len(connectorConfig) > 0 {
 		rpcClient.init(connectorConfig)
 	}
 	if acceptorConfig.Service != "" {
-		rpcServer.init(rpcConfig.Acceptor, biz)
+		rpcServer.init(rpcConfig.Acceptor)
 	}
 
 	logs.Info("application init.")
 
 	return app
 }
+
+func (app *ApplicationImpl) RegistService(biz map[string]IBizDispatcher) {
+	if acceptorConfig.Service != "" {
+		rpcServer.registService(biz)
+	}
+}
+
 func (app *ApplicationImpl) Start() {
 	rpcClient := RpcClientImpl{}
 	rpcServer := RpcServerImpl{}

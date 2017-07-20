@@ -70,7 +70,7 @@ type ResourceConn struct {
 }
 
 func (r ResourceConn) Close() {
-	logs.Info("Transport Close")
+	//logs.Info("Transport Close")
 	//r.client.Transport.Close()
 }
 
@@ -118,11 +118,11 @@ func (connector *ThriftConnector) Invoke(service string, method string, msg *rpc
 			}
 			return rmsg, el
 		} else {
-			logs.Error("Key Not Found")
-			return nil, errors.New("Key Not Found")
+			logs.Error(serviceName + " Not Found")
+			return nil, errors.New(serviceName + " Not Found")
 		}
 	} else {
-		logs.Error("Key Not Found")
-		return nil, errors.New("Connector Not Found")
+		logs.Error(service + "Key Not Found")
+		return nil, errors.New(service + " Not Found")
 	}
 }

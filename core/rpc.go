@@ -5,9 +5,9 @@ var app *ApplicationImpl
 type Rpc struct {
 }
 
-func (rpc *Rpc) CreateApp(configPath string, biz map[string]IBizDispatcher) *ApplicationImpl {
+func (rpc *Rpc) CreateApp(configPath string) *ApplicationImpl {
 	//初始化应用
-	app = app.Init(configPath, biz)
+	app = app.Init(configPath)
 	return app
 }
 
