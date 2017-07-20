@@ -71,10 +71,9 @@ func startHttp() {
 
 func startRpc() {
 	var configFile = "example/client/config"
-	var biz = make(map[string]core.IBizDispatcher)
 	//创建RPC框架
 	rpc := core.Rpc{}
-	app := rpc.CreateApp(configFile, biz)
+	app := rpc.CreateApp(configFile)
 
 	//启动RPC框架
 	app.Start()

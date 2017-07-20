@@ -25,7 +25,8 @@ func main() {
 
 	//创建RPC框架
 	rpc := core.Rpc{}
-	app := rpc.CreateApp(configFile, biz)
+	app := rpc.CreateApp(configFile)
+	app.RegistService(biz)
 
 	//启动框架
 	app.Start()
