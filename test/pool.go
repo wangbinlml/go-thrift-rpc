@@ -3,8 +3,9 @@ package main
 import (
 	"time"
 	"github.com/garyburd/redigo/redis"
-	"github.com/youtube/vitess/go/pools"
 	"golang.org/x/net/context"
+	pools "github.com/youtube/vitess/pools"
+	"log"
 )
 
 // ResourceConn adapts a Redigo connection to a Vitess Resource.

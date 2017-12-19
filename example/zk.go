@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	log "github.com/alecthomas/log4go"
 	_ "github.com/wangbinlml/go-thrift-rpc/core"
 	"time"
 	"github.com/samuel/go-zookeeper/zk"
 	"github.com/wangbinlml/go-thrift-rpc/core"
+	"github.com/astaxie/beego/logs"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 		for {
 			select {
 			case snapshot := <-snapshots:
-				log.Info("sssssssssssssss")
+				logs.Info("sssssssssssssss")
 				fmt.Printf("%+v\n", snapshot)
 			case err := <-errors:
 				fmt.Printf("%+v\n", err)

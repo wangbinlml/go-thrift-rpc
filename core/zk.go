@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	zookeeper "github.com/samuel/go-zookeeper/zk"
 	"strings"
 	"time"
@@ -9,6 +8,7 @@ import (
 	"path"
 	"syscall"
 	"os"
+	"github.com/astaxie/beego/logs"
 )
 
 var (

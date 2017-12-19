@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 	"log"
-	"vitess/context"
-	"vitess/pools"
+	"github.com/youtube/vitess/pools"
+	"github.com/garyburd/redigo/redis"
+	"golang.org/x/net/context"
 )
 // ResourceConn adapts a Redigo connection to a Vitess Resource.
 type ResourceConn struct {

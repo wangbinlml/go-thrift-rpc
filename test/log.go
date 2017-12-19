@@ -2,15 +2,14 @@ package main
 
 import (
 	"github.com/wangbinlml/go-thrift-rpc/core"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
+	"github.com/astaxie/beego/logs"
 )
 
 func main() {
 	core.InitLog("test/")
-	l := logs.GetLogger("system")
-	l.Println("this is a message of http")
+	logs.Info("this is a message of http")
 	//an official log.Logger with prefix ORM
-	logs.GetLogger("ORM").Println("this is a message of orm")
+	logs.Info("this is a message of orm")
 
 	logs.Alert("alert")
 	logs.Notice("notice")

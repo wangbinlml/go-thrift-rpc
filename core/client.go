@@ -2,7 +2,7 @@ package core
 
 import (
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
+	"github.com/astaxie/beego/logs"
 )
 
 type RpcClient interface {

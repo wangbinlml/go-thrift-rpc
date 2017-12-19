@@ -2,8 +2,8 @@ package core
 
 import (
 	"reflect"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	io "io/ioutil"
+	"github.com/astaxie/beego/logs"
 )
 
 func Switch(value reflect.Value) {

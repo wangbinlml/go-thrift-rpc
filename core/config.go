@@ -3,8 +3,8 @@ package core
 import (
 	io "io/ioutil"
 	"github.com/tidwall/gjson"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	"time"
+	"github.com/astaxie/beego/logs"
 )
 
 var rpcConfig RpcConfig
@@ -45,22 +45,12 @@ type ZKConfig struct {
 }
 
 type LogConfig struct {
-	// The opened file
-	Filename   string `json:"filename"`
-
-	// Rotate at line
-	MaxLines         int `json:"maxlines"`
-
-	// Rotate at size
-	MaxSize        int `json:"maxsize"`
-
-	// Rotate daily
-	Daily         bool  `json:"daily"`
-	MaxDays       int64 `json:"maxdays"`
-	Rotate bool `json:"rotate"`
-	Level int `json:"level"`
-	Perm string `json:"perm"`
-	Category string `json:"category"`
+	FileName string `json:"filename"`
+	Level    string `json:"level"`
+	Maxlines string `json:"maxlines"`
+	Maxsize  string `json:"maxsize"`
+	Daily    bool   `json:"daily"`
+	Maxdays  string `json:"maxdays"`
 }
 
 
@@ -84,16 +74,10 @@ func InitConfig(configPath string) {
 }
 
 func InitLog(configPath string)  {
-	data := Load(configPath+"/log4go.json")
-	gjson.Unmarshal(data, &logConfig)
-
-	config := string(data)
 	logs.SetLogger("console")
-	logs.SetLogger(logs.AdapterFile, config)
-	logs.SetCategory(logConfig.Category)
-
-	//日志默认不输出调用的文件名和文件行号
-	logs.EnableFuncCallDepth(true)
+	logData := Load(configPath+"/log.json")
+	gjson.Unmarshal(logData, &logConfig)
+	logs.SetLogger(logs.AdapterFile, string(logData))
 }
 
 func (config *RpcConfig) getRpcConfig() RpcConfig {

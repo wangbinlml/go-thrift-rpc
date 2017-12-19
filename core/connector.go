@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
 	"git.apache.org/thrift.git/lib/go/thrift"
 	"net"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"golang.org/x/net/context"
 	"github.com/satori/go.uuid"
 	"github.com/youtube/vitess/pools"
+	"github.com/astaxie/beego/logs"
 )
 
 var serviceMap = make(map[string]*pools.ResourcePool)

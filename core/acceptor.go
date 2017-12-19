@@ -5,7 +5,7 @@ import (
 	"github.com/wangbinlml/go-thrift-rpc/core/gen-go/rpc"
 	zookeeper "github.com/samuel/go-zookeeper/zk"
 	"os"
-	"github.com/wangbinlml/go-thrift-rpc/core/logs"
+	"github.com/astaxie/beego/logs"
 )
 
 var zkUtil = new(ZKUtil)

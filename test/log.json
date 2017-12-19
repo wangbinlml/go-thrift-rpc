@@ -1,0 +1,8 @@
+{
+  "filename": "./logs/access.log",
+  "level": 7,
+  "maxlines": 0,
+  "maxsize": 0,
+  "daily": true,
+  "maxdays": 30
+}
